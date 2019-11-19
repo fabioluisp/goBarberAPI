@@ -7,7 +7,7 @@ import User from '../models/User';
 import File from '../models/File';
 import Notification from '../schemas/Notification';
 
-import CancellaationMail from '../jobs/CancellationMail';
+import CancellationMail from '../jobs/CancellationMail';
 import Queue from '../../lib/Queue';
 
 // import Mail from '../../lib/Mail';
@@ -160,7 +160,7 @@ class AppointmentController {
     await appointment.save();
 
     // gerenciamento do email de cancelamento transferido pro CancellationMail
-    await Queue.add(CancellaationMail.key, { appointment });
+    await Queue.add(CancellationMail.key, { appointment });
 
     return res.json(appointment);
   }
