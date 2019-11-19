@@ -6,7 +6,13 @@ import Appointment from '../models/Appointment';
 import User from '../models/User';
 import File from '../models/File';
 import Notification from '../schemas/Notification';
-import Mail from '../../lib/Mail';
+
+import CancellaationMail from '../jobs/CancellationMail';
+import Queue from '../../lib/Queue';
+
+// import Mail from '../../lib/Mail';
+// nao voui importar mais o Mail pq nao vai ser por aqui mais q será enviado o email
+// foi importado o 'queue', a fila, que vai ser onde será processado o envio de mails
 
 class AppointmentController {
   async index(req, res) {
@@ -153,18 +159,8 @@ class AppointmentController {
 
     await appointment.save();
 
-    await Mail.sendMail({
-      to: `${appointment.provider.name} <${appointment.provider.email}>`,
-      subject: 'Agendamento cancelado',
-      template: 'cancellation',
-      context: {
-        provider: appointment.provider.name,
-        user: appointment.user.name,
-        date: format(appointment.date, "dd 'de' MMMM', às' H:mm'h.'", {
-          locale: pt,
-        }),
-      },
-    });
+    // gerenciamento do email de cancelamento transferido pro CancellationMail
+    await Queue.add(CancellaationMail.key, { appointment });
 
     return res.json(appointment);
   }
